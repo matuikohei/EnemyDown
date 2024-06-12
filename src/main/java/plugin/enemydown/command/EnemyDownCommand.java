@@ -284,3 +284,5 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
   }
 
 }
+
+//プッシュできるかの確認
