@@ -1,15 +1,10 @@
 package plugin.enemydown.command;
 
-import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SplittableRandom;
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -27,8 +22,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import plugin.enemydown.Main;
+import plugin.enemydown.PlayerScoreData;
 import plugin.enemydown.data.ExecutingPlayer;
-import plugin.enemydown.mapper.PlayerScoreMapper;
 import plugin.enemydown.mapper.data.PlayerScore;
 
 /**
@@ -44,41 +39,24 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
   public static final String NONE = "none";
   public static final String LIST = "list";
 
-  private Main main;
-  private List<ExecutingPlayer> executingPlayerList = new ArrayList<>();
-  private List<Entity> spownEntityList = new ArrayList<>();
+  private final Main main;
+  private final PlayerScoreData playerScoreData = new PlayerScoreData();
 
-  private SqlSessionFactory sqlSessionFactory;
+  private final List<ExecutingPlayer> executingPlayerList = new ArrayList<>();
+  private final List<Entity> spownEntityList = new ArrayList<>();
+
 
   public EnemyDownCommand(Main main) {
     this.main = main;
-
-    try {
-      InputStream inputStream = Resources.getResourceAsStream("mybatis-config.xml");
-      this.sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @Override
   public boolean onExecutePLayerCommand(Player player, Command command, String label, String[] args) {
+    //最初の引数が「list」だったらスコアを一覧表示して処理を終了する。
     if (args.length == 1 && LIST.equals(args[0])) {
-      try (SqlSession session = sqlSessionFactory.openSession()) {
-        PlayerScoreMapper mapper = session.getMapper(PlayerScoreMapper.class);
-        List<PlayerScore> playerScoreList = mapper.selectList();
-
-        for (PlayerScore playerScore : playerScoreList) {
-          player.sendMessage(playerScore.getId() + " | "
-              + playerScore.getPlayerName() + " | "
-              + playerScore.getScore() + " | "
-              + playerScore.getDifficulty() + " | "
-              + playerScore.getRegisteredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        }
-      }
+      sendPlayerList(player);
       return false;
     }
-
     String difficulty = getDifficulty(player, args);
     if (difficulty.equals(NONE)) {
       return false;
@@ -92,12 +70,35 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
     return true;
   }
 
+
+  @Override
+  public boolean onExecuteNPCCommand(CommandSender sender, Command command, String label,
+      String[] args) {
+    return false;
+  }
+
+  /**
+   * 現在登録されているスコアの一覧をメッセージに送る。
+   *
+   * @param player 　プレイヤー
+   */
+  private void sendPlayerList(Player player) {
+    List<PlayerScore> playerScoreList = playerScoreData.selectList();
+    for (PlayerScore playerScore : playerScoreList) {
+      player.sendMessage(playerScore.getId() + " | "
+          + playerScore.getPlayerName() + " | "
+          + playerScore.getScore() + " | "
+          + playerScore.getDifficulty() + " | "
+          + playerScore.getRegisteredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+    }
+  }
+
   /**
    * 難易度をコマンド引数から取得します。
    *
    * @param player 　コマンドを実行したプレイヤー
    * @param args   　コマンド引数
-   * @return　難易度
+   * @return 　難易度
    */
   private String getDifficulty(Player player, String[] args) {
     if (args.length == 1 && (EASY.equals(args[0]) || NORMAL.equals(args[0]) || HARD.equals(
@@ -106,12 +107,6 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
     }
     player.sendMessage(ChatColor.RED + "実行できません。コマンド引数の1つ目に難易度指定が必要です。[easy, normal, hard]");
     return NONE;
-  }
-
-  @Override
-  public boolean onExecuteNPCCommand(CommandSender sender, Command command, String label,
-      String[] args) {
-    return false;
   }
 
 
@@ -144,7 +139,7 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
    * 現在実行しているプレイヤーのスコア情報を取得する。
    *
    * @param player 　コマンドを実行したプレイヤー
-   * @return　現在実行しているプレイヤーのスコア情報
+   * @return 　現在実行しているプレイヤーのスコア情報
    */
   private ExecutingPlayer getPlayerScore(Player player) {
     ExecutingPlayer executingPlayer = new ExecutingPlayer(player.getName());
@@ -211,13 +206,9 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
 
         removePotionEffect(player);
 
-        //スコア登録処理
-        try (SqlSession session = sqlSessionFactory.openSession(true)) {
-          PlayerScoreMapper mapper = session.getMapper(PlayerScoreMapper.class);
-          mapper.insert(new PlayerScore(nowExecutingPlayer.getPlayerName(),
-              nowExecutingPlayer.getScore(),
-              difficulty));
-        }
+        playerScoreData.insert(new PlayerScore(nowExecutingPlayer.getPlayerName()
+            , nowExecutingPlayer.getScore()
+            , difficulty));
 
         return;
       }
@@ -232,7 +223,7 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
    * 敵の出現場所を取得します。 出現場所のX軸とZ軸は自分の位置からプラス、ランダムで-10〜9の値が設定されます。 Y軸はプライヤーと同じ位置になります。
    *
    * @param player 　コマンドを実行したプレイヤー
-   * @return　敵の出現場所
+   * @return 　敵の出現場所
    */
   private Location getEnemySpawnlocation(Player player) {
     Location playerLocation = player.getLocation();
@@ -249,7 +240,7 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
    * ランダムで敵を抽出して、その結果の敵を取得します。
    *
    * @param difficulty 難易度
-   * @return　敵
+   * @return 　敵
    */
   private EntityType getEnemy(String difficulty) {
     List<EntityType> enemyList = switch (difficulty) {
@@ -273,4 +264,3 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
 
 }
 
-//中級編DAY31　プッシュ
