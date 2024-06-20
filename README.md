@@ -10,7 +10,13 @@
 ---
 「EenemyDown」は、プライヤーが制限時間内に敵を倒してスコア（合計点数）を競うミニゲームです。ゲームの難易度をeasy、nomal、hardから選択することができます。ゲーム終了後に、スコア（合計得点）が表示され、スコアはデータベース（MySQL）に保存され、後から確認することができます。
 
+<img width="1440" alt="スクリーンショット 2024-06-20 20 32 49" src="https://github.com/matuikohei/EnemyeDown/assets/135627017/48c82120-6aac-480c-9f6a-1d120ae20219">
 
+<img width="1440" alt="スクリーンショット 2024-06-20 20 34 13" src="https://github.com/matuikohei/EnemyeDown/assets/135627017/58a5d332-6755-400b-a067-78a97b857285">
+
+<img width="1440" alt="スクリーンショット 2024-06-20 20 40 21" src="https://github.com/matuikohei/EnemyeDown/assets/135627017/cfc1ab24-5f36-487a-929a-fe9185e26d06">
+
+<img width="1440" alt="スクリーンショット 2024-06-20 20 33 40" src="https://github.com/matuikohei/EnemyeDown/assets/135627017/63cce96c-8627-45be-b59d-9d1c33cf1e7c">
 
 
 **主要機能**
