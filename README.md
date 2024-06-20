@@ -41,10 +41,13 @@
 **プラグイン実装方法**
 ---
 * Java(バージョン17.0.11)のインストール
+https://www.oracle.com/java/technologies/downloads/
 * Spigot（バージョン1.19.3）のインストール
+https://getbukkit.org/
 * Minecraft（バージョン1.19.3）のインストール
+https://www.minecraft.net/ja-jp
 * URLのファイルをダウンロード
-  https://drive.google.com/file/d/1lvgYwcjXMaafYsV3eEeobxUXBzRPbUjY/view?usp=sharing
+https://drive.google.com/file/d/1lvgYwcjXMaafYsV3eEeobxUXBzRPbUjY/view?usp=sharing
 * Minecraftフォルダのpluginsフォルダの中に、ダウンロードしたファイルを移動することで、プラグインを実装できます
 
 **使用技術**
