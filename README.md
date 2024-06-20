@@ -34,7 +34,7 @@
 * Spigot（バージョン1.19.3）のインストール
 * Minecraft（バージョン1.19.3）のインストール
 * URLのファイルをダウンロード
-  https://drive.google.com/file/d/1zSzhI3lvb3SLPQZYdc9UaBRbffX-Ap8W/view?usp=drive_link
+  https://drive.google.com/file/d/1lvgYwcjXMaafYsV3eEeobxUXBzRPbUjY/view?usp=sharing
 * Minecraftフォルダのpluginsフォルダの中に、ダウンロードしたファイルを移動することで、プラグインを実装できます
 
 **使用技術**
